@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NekoNotes - Daily Tracker</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <svg style="display:none">
+    <symbol id="paw" viewBox="0 0 24 24">
+      <ellipse cx="12" cy="15.5" rx="5.5" ry="4.5"/>
+      <ellipse cx="5.5" cy="9" rx="2.5" ry="3"/>
+      <ellipse cx="10" cy="5.5" rx="2.5" ry="3"/>
+      <ellipse cx="16" cy="5.5" rx="2.5" ry="3"/>
+      <ellipse cx="20" cy="9" rx="2.5" ry="3"/>
+    </symbol>
+  </svg>
+
+  <nav class="game-nav">
+    <div class="wrap game-nav-inner">
+
+      <a href="dashboard.html" class="game-brand">
+        <svg><use href="#paw"/></svg>
+        <span>NekoNotes</span>
+      </a>
+
+      <div class="game-nav-links">
+        <a href="dashboard.html" class="game-link"><span>🏠</span><small>Home</small></a>
+        <a href="diary.html" class="game-link"><span>📔</span><small>Diary</small></a>
+        <a href="tracker.html" class="game-link active"><span>✅</span><small>Tasks</small></a>
+        <a href="chest.html" class="game-link"><span>🎁</span><small>Chest</small></a>
+        <a href="collection.html" class="game-link"><span>🐱</span><small>Cats</small></a>
+        <a href="themes.html" class="game-link"><span>🎨</span><small>Themes</small></a>
+        <a href="cozy.html" class="game-link"><span>🌙</span><small>Cozy</small></a>
+        <a href="achievements.html" class="game-link"><span>🏆</span><small>Achievements</small></a>
+      </div>
+
+      <div class="game-paw-counter">
+        <svg><use href="#paw"/></svg>
+        <span id="pawCount">0</span>
+        <small>paws</small>
+      </div>
+
+    </div>
+  </nav>
+
+  <main class="tracker-page wrap">
+
+  <div class="tracker-heading">
+    <span class="tracker-subtitle">A little progress every day ♡</span>
+    <h1>Daily Task Tracker 🐾</h1>
+    <p>Complete your little tasks and collect paws along the way!</p>
+  </div>
+
+  <section class="tracker-summary">
+    <div class="tracker-stat">
+      <span>🌸</span>
+      <h3 id="totalTasks">0</h3>
+      <p>Total Tasks</p>
+    </div>
+
+    <div class="tracker-stat">
+      <span>⭐</span>
+      <h3 id="completedTasks">0</h3>
+      <p>Completed</p>
+    </div>
+
+    <div class="tracker-stat">
+      <span>🐾</span>
+      <h3 id="earnedPaws">0</h3>
+      <p>Paws Earned Today</p>
+    </div>
+  </section>
+
+  <section class="tracker-form">
+    <h2>Add a New Task ♡</h2>
+
+    <input
+      type="text"
+      id="taskInput"
+      placeholder="What would you like to accomplish?"
+      maxlength="100"
+    >
+
+    <div class="tracker-form-bottom">
+      <select id="taskDifficulty">
+        <option value="tiny">Tiny Task (+5 paws)</option>
+        <option value="medium">Medium Task (+10 paws)</option>
+        <option value="big">Big Task (+20 paws)</option>
+      </select>
+
+      <button id="addTaskBtn">Add Task +</button>
+    </div>
+  </section>
+
+  <section class="tracker-list-section">
+    <h2>Today's Tasks 🌷</h2>
+    <div id="taskList">
+      <p>Your tasks will appear here.</p>
+    </div>
+  </section>
+
+</main>
+
+  <script src="theme.js"></script>
+  <script src="tracker.js"></script>
+
+</body>
+</html>

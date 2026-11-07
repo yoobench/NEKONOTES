@@ -1,342 +1,161 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NekoNotes - Your Cozy Cat Diary</title>
-
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-    <div class="app">
-
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
-            <div class="brand">
-                <span class="brand-icon">🐱</span>
-                <div>
-                    <h2>NekoNotes</h2>
-                    <p>Your cozy little world</p>
-                </div>
-            </div>
-
-            <div class="profile-card">
-                <div class="avatar">🐈</div>
-                <div>
-                    <h3>Cat Lover</h3>
-                    <p>Diary Explorer</p>
-                </div>
-            </div>
-
-            <nav class="navigation">
-                <p class="nav-label">MENU</p>
-
-                <button class="nav-btn active" data-page="dashboard">
-                    🏠 Dashboard
-                </button>
-
-                <button class="nav-btn" data-page="diary">
-                    📖 My Diary
-                </button>
-
-                <button class="nav-btn" data-page="tracker">
-                    ✅ Daily Tracker
-                </button>
-
-                <button class="nav-btn" data-page="cats">
-                    🐱 Cat Collection
-                </button>
-            </nav>
-
-            <div class="sidebar-bottom">
-                <div class="mini-cat">🐈‍⬛</div>
-                <p>Every little step deserves a reward!</p>
-            </div>
-        </aside>
-
-        <!-- MAIN CONTENT -->
-        <main class="main-content">
-
-            <header class="topbar">
-                <div>
-                    <p class="eyebrow">YOUR PERSONAL SPACE</p>
-                    <h1 id="pageTitle">Welcome to NekoNotes! 🌸</h1>
-                    <p id="currentDate" class="muted"></p>
-                </div>
-
-                <div class="points-badge">
-                    ⭐ <span id="headerPoints">0</span> points
-                </div>
-            </header>
-
-            <!-- DASHBOARD -->
-            <section id="dashboard" class="page active-page">
-
-                <div class="welcome-banner">
-                    <div>
-                        <p class="banner-label">A LITTLE NOTE FOR YOU</p>
-                        <h2>Small moments matter. 💗</h2>
-                        <p>
-                            Write your thoughts, finish your goals,
-                            and collect adorable cats along the way!
-                        </p>
-
-                        <button class="primary-btn" onclick="openPage('diary')">
-                            Write a Diary Entry ✍️
-                        </button>
-                    </div>
-
-                    <div class="banner-cat">🐱</div>
-                </div>
-
-                <h2 class="section-title">Your Progress ✨</h2>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon pink">⭐</div>
-                        <p>Total Points</p>
-                        <h2 id="totalPoints">0</h2>
-                        <small>Your rewards so far</small>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-icon purple">📖</div>
-                        <p>Diary Entries</p>
-                        <h2 id="totalEntries">0</h2>
-                        <small>Memories saved</small>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-icon yellow">✅</div>
-                        <p>Tasks Completed</p>
-                        <h2 id="totalTasks">0</h2>
-                        <small>Little wins count!</small>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-icon blue">🐱</div>
-                        <p>Cats Collected</p>
-                        <h2 id="totalCats">1</h2>
-                        <small>Your furry friends</small>
-                    </div>
-                </div>
-
-                <div class="dashboard-grid">
-
-                    <div class="panel">
-                        <div class="panel-heading">
-                            <h2>Today's Tasks 🌷</h2>
-                            <button class="text-btn" onclick="openPage('tracker')">
-                                View all →
-                            </button>
-                        </div>
-
-                        <div id="dashboardTasks" class="task-list"></div>
-                    </div>
-
-                    <div class="panel featured-cat">
-                        <h2>Cat of the Moment 🐾</h2>
-                        <div class="featured-cat-image" id="featuredCatImage">
-                            🐱
-                        </div>
-                        <h3 id="featuredCatName">Mochi</h3>
-                        <p id="featuredCatDescription">
-                            Your first loyal companion!
-                        </p>
-                        <button class="secondary-btn" onclick="openPage('cats')">
-                            Meet Your Cats
-                        </button>
-                    </div>
-
-                </div>
-
-                <div class="panel recent-panel">
-                    <div class="panel-heading">
-                        <h2>Recent Diary Entries 💌</h2>
-                        <button class="text-btn" onclick="openPage('diary')">
-                            Open diary →
-                        </button>
-                    </div>
-
-                    <div id="recentEntries" class="entry-list"></div>
-                </div>
-
-            </section>
-
-            <!-- DIARY PAGE -->
-            <section id="diary" class="page">
-
-                <div class="page-intro">
-                    <h2>My Little Diary 📖</h2>
-                    <p>
-                        A safe little corner for your thoughts,
-                        memories, and feelings.
-                    </p>
-                </div>
-
-                <div class="panel diary-editor">
-                    <h3>Write Something Today ✍️</h3>
-
-                    <label for="entryTitle">Entry Title</label>
-                    <input
-                        type="text"
-                        id="entryTitle"
-                        placeholder="Give your memory a title..."
-                        maxlength="100"
-                    >
-
-                    <label for="entryMood">How are you feeling?</label>
-                    <select id="entryMood">
-                        <option value="😊">😊 Happy</option>
-                        <option value="🥰">🥰 Loved</option>
-                        <option value="😌">😌 Calm</option>
-                        <option value="😴">😴 Tired</option>
-                        <option value="😔">😔 Sad</option>
-                        <option value="😤">😤 Frustrated</option>
-                        <option value="🤩">🤩 Excited</option>
-                    </select>
-
-                    <label for="entryContent">Your Thoughts</label>
-                    <textarea
-                        id="entryContent"
-                        rows="7"
-                        placeholder="Dear diary, today..."
-                    ></textarea>
-
-                    <div class="editor-footer">
-                        <span class="muted">💗 Your story matters.</span>
-
-                        <button class="primary-btn" id="saveEntryBtn">
-                            Save Entry (+10 ⭐)
-                        </button>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <div class="panel-heading">
-                        <h2>My Memories 💌</h2>
-                        <span id="entryCountLabel" class="muted">
-                            0 entries
-                        </span>
-                    </div>
-
-                    <div id="allEntries" class="entry-list"></div>
-                </div>
-
-            </section>
-
-            <!-- DAILY TRACKER PAGE -->
-            <section id="tracker" class="page">
-
-                <div class="page-intro">
-                    <h2>Daily Tracker ✅</h2>
-                    <p>
-                        Turn your little goals into little victories!
-                    </p>
-                </div>
-
-                <div class="panel">
-                    <h3>Add a Daily Task 🌱</h3>
-
-                    <form id="taskForm" class="task-form">
-                        <input
-                            type="text"
-                            id="taskInput"
-                            placeholder="e.g. Read for 20 minutes"
-                            maxlength="150"
-                            required
-                        >
-
-                        <button class="primary-btn" type="submit">
-                            + Add Task
-                        </button>
-                    </form>
-
-                    <p class="muted reward-note">
-                        Complete a task to earn 5 points! ⭐
-                    </p>
-                </div>
-
-                <div class="panel">
-                    <div class="panel-heading">
-                        <h2>My Tasks 🐾</h2>
-
-                        <span id="taskCountLabel" class="muted">
-                            0 tasks
-                        </span>
-                    </div>
-
-                    <div class="filter-buttons">
-                        <button class="filter-btn active" data-filter="all">
-                            All
-                        </button>
-
-                        <button class="filter-btn" data-filter="active">
-                            In Progress
-                        </button>
-
-                        <button class="filter-btn" data-filter="completed">
-                            Completed
-                        </button>
-                    </div>
-
-                    <div id="allTasks" class="task-list"></div>
-                </div>
-
-            </section>
-
-            <!-- CAT COLLECTION PAGE -->
-            <section id="cats" class="page">
-
-                <div class="page-intro">
-                    <h2>My Cat Collection 🐱</h2>
-                    <p>
-                        Collect your furry friends by earning points
-                        through your diary and daily tasks.
-                    </p>
-                </div>
-
-                <div class="collection-banner">
-                    <div>
-                        <p>Your Cat Collection</p>
-                        <h2>
-                            <span id="collectionCount">1</span> / 6 Cats
-                        </h2>
-                        <p>Keep going! More cats are waiting for you.</p>
-                    </div>
-
-                    <div class="collection-banner-cat">😺</div>
-                </div>
-
-                <div id="catGrid" class="cat-grid"></div>
-
-                <div class="panel reward-info">
-                    <h3>How to Earn Points ⭐</h3>
-                    <p>📖 Save a diary entry: <strong>+10 points</strong></p>
-                    <p>✅ Complete a task: <strong>+5 points</strong></p>
-                    <p>🐱 Unlock a new cat: <strong>Spend its required points</strong></p>
-                    <p class="muted">
-                        Each diary entry and completed task can earn points
-                        only once. Unlocked cats stay in your collection.
-                    </p>
-                </div>
-
-            </section>
-
-            <footer>
-                <p>Made with 💗 and a little bit of meow magic.</p>
-                <p>NekoNotes © 2026</p>
-            </footer>
-
-        </main>
-
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>NekoNotes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="NekoNotes is a reward based digital diary and task tracker with cat sticker collectibles.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="paw" viewBox="0 0 64 64">
+    <ellipse cx="32" cy="42" rx="14" ry="12"/>
+    <ellipse cx="13" cy="28" rx="7" ry="9"/>
+    <ellipse cx="25" cy="15" rx="7" ry="9.5"/>
+    <ellipse cx="39" cy="15" rx="7" ry="9.5"/>
+    <ellipse cx="51" cy="28" rx="7" ry="9"/>
+  </symbol>
+  <symbol id="lockicon" viewBox="0 0 24 24">
+    <path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 1 1 6 0v3H9z"/>
+  </symbol>
+</svg>
+
+<nav>
+  <div class="wrap nav-in">
+    <a href="#top" class="brand">
+      <svg style="fill:var(--pink-deep)"><use href="#paw"/></svg> NekoNotes
+    </a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#app">Diary and tasks</a>
+      <a href="#collection">Collection</a>
+      <span class="paw-pill"><svg><use href="#paw"/></svg><span id="pawCount">0</span> paws</span>
+    </div>
+  </div>
+</nav>
+
+<header class="wrap hero" id="top">
+  <div>
+    <span class="eyebrow">A diary that purrs back</span>
+    <h1>Write it down. Do the thing. <span>Collect a cat.</span></h1>
+    <p class="lead">NekoNotes is a cozy digital diary and task tracker. Finish tasks and write daily entries to earn paws, then trade them for adorable cat stickers to fill your collection.</p>
+    <a href="#app" class="btn btn-primary">Start writing</a>
+    <a href="#collection" class="btn btn-ghost">See the stickers</a>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <div class="hero-card hc1 floaty"><div class="slot" data-slot="0"></div></div>
+    <div class="hero-card hc2 floaty"><div class="slot" data-slot="4"></div></div>
+    <div class="hero-card hc3 floaty"><div class="slot" data-slot="2"></div></div>
+  </div>
+</header>
+
+<section id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>How NekoNotes works</h2>
+      <p>Three small habits, one growing sticker book.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><h3>Add your tasks</h3><p>Jot down what you need to do and pick how big it is. Bigger tasks pay out more paws.</p></div>
+      <div class="step"><div class="num">2</div><h3>Keep your diary</h3><p>Write about your day, choose a mood, and earn bonus paws for your first entry each day.</p></div>
+      <div class="step"><div class="num">3</div><h3>Unlock cats</h3><p>Spend your paws on a mystery sticker. Ten collectible cats are waiting, from sweet to silly.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="app">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Your notebook</h2>
+      <p>Everything is saved privately in this browser, so your notes are always here when you come back.</p>
     </div>
 
-    <!-- NOTIFICATION -->
-    <div id="toast" class="toast"></div>
+    <div class="app-grid">
+      <div class="panel">
+        <h3>Task tracker</h3>
+        <p class="sub">Tick a task off to earn paws.</p>
+        <div class="progress"><div id="taskBar"></div></div>
+        <form id="taskForm">
+          <div class="row">
+            <input class="field" id="taskInput" placeholder="What are you tackling today?" maxlength="120" required>
+          </div>
+          <div class="seg" id="sizeSeg">
+            <button type="button" data-v="5">Tiny  +5</button>
+            <button type="button" data-v="10" class="on">Medium  +10</button>
+            <button type="button" data-v="20">Big  +20</button>
+          </div>
+          <div class="row"><button class="small-btn" type="submit">Add task</button></div>
+        </form>
+        <ul class="tasks" id="taskList"></ul>
+      </div>
 
-    <script src="script.js"></script>
+      <div class="panel">
+        <h3>Diary</h3>
+        <p class="sub">First entry of the day earns 15 paws.</p>
+        <div class="stats">
+          <div class="stat"><b id="stEntries">0</b><span>entries</span></div>
+          <div class="stat"><b id="stStreak">0</b><span>day streak</span></div>
+          <div class="stat"><b id="stDone">0</b><span>tasks done</span></div>
+        </div>
+        <form id="diaryForm">
+          <div class="chips" id="moods">
+            <button type="button" class="chip" data-m="Happy">Happy</button>
+            <button type="button" class="chip" data-m="Calm">Calm</button>
+            <button type="button" class="chip" data-m="Excited">Excited</button>
+            <button type="button" class="chip" data-m="Tired">Tired</button>
+            <button type="button" class="chip" data-m="Stressed">Stressed</button>
+          </div>
+          <textarea class="field" id="diaryInput" placeholder="Dear diary, today..." required></textarea>
+          <div class="row" style="margin-top:12px"><button class="small-btn" type="submit">Save entry</button></div>
+        </form>
+        <div class="entries" id="entryList"></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-</body>
-</html>
+<section id="collection">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Cat sticker collection</h2>
+      <p>Spend paws to reveal a random sticker. Collect all ten.</p>
+    </div>
+
+    <div class="shop">
+      <div>
+        <h3>Mystery sticker</h3>
+        <p><span id="ownedCount">0</span> of 10 collected. Each pull costs 30 paws.</p>
+      </div>
+      <button class="gacha" id="gachaBtn">Unlock a sticker</button>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <div class="note">
+      Sticker pictures load from <code>stickers/cat-01.png</code> to <code>stickers/cat-10.png</code> next to this page. You can also use the Change image link under any card to pick a picture from your device.
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="brand"><svg style="fill:var(--pink-deep);width:26px;height:26px"><use href="#paw"/></svg> NekoNotes</div>
+  <div>Small notes, big purrs.</div>
+  <button class="reset" id="resetBtn">Reset all data</button>
+</footer>
+
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <span class="new">New sticker</span>
+    <div class="big slot" id="modalPic"></div>
+    <h3 id="modalName"></h3>
+    <p class="rar" id="modalRar"></p>
+    <button class="small-btn" id="modalClose" style="margin-top:16px">Add to collection</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<input type="file" accept="image/*" id="filePick" hidden>
+
+<script src="script.js"></script>
+
+</body></html>

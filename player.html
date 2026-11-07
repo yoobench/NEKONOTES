@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NekoNotes Player</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-family: Arial, sans-serif;
+    }
+
+    #appFrame {
+      flex: 1;
+      width: 100%;
+      border: none;
+    }
+
+    .persistent-player {
+      padding: 12px;
+      background: #fff0f6;
+      border-top: 2px solid #ffb6d0;
+      text-align: center;
+    }
+
+    .persistent-player button {
+      padding: 9px 18px;
+      border: none;
+      border-radius: 20px;
+      background: #ff8fb7;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <iframe id="appFrame" src="dashboard.html"></iframe>
+
+  <div class="persistent-player">
+    🎵 NekoNotes Music Player
+    <button id="persistentPlay">▶ Play</button>
+  </div>
+<script src="persistent-audio.js"></script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Mystery Chest | NekoNotes</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- Shared Paw Icon -->
+  <svg style="display:none">
+    <symbol id="paw" viewBox="0 0 24 24">
+      <ellipse cx="12" cy="15.5" rx="5.5" ry="4.5"/>
+      <ellipse cx="5.5" cy="9" rx="2.5" ry="3"/>
+      <ellipse cx="10" cy="5.5" rx="2.5" ry="3"/>
+      <ellipse cx="16" cy="5.5" rx="2.5" ry="3"/>
+      <ellipse cx="20" cy="9" rx="2.5" ry="3"/>
+    </symbol>
+</svg>
+
+<nav class="game-nav">
+  <div class="wrap game-nav-inner">
+
+    <a href="dashboard.html" class="game-brand">
+      <svg><use href="#paw"/></svg>
+      <span>NekoNotes</span>
+    </a>
+
+    <div class="game-nav-links">
+
+      <a href="dashboard.html" class="game-link">
+        <span>🏠</span>
+        <small>Home</small>
+      </a>
+
+      <a href="diary.html" class="game-link">
+        <span>📔</span>
+        <small>Diary</small>
+      </a>
+
+      <a href="tracker.html" class="game-link">
+        <span>✅</span>
+        <small>Tasks</small>
+      </a>
+
+      <a href="chest.html" class="game-link active">
+        <span>🎁</span>
+        <small>Chest</small>
+      </a>
+
+      <a href="collection.html" class="game-link">
+        <span>🐱</span>
+        <small>Cats</small>
+      </a>
+
+      <a href="themes.html" class="game-link">
+        <span>🎨</span>
+        <small>Themes</small>
+      </a>
+
+      <a href="cozy.html" class="game-link">
+        <span>🌙</span>
+        <small>Cozy</small>
+      </a>
+
+      <a href="achievements.html" class="game-link">
+        <span>🏆</span>
+        <small>Achievements</small>
+      </a>
+
+    </div>
+
+    <div class="game-paw-counter">
+      <svg><use href="#paw"/></svg>
+      <span id="pawCount">0</span>
+      <small>paws</small>
+    </div>
+
+  </div>
+</nav>
+
+ <main class="chest-page">
+
+  <div class="chest-heading">
+    <span class="eyebrow">A LITTLE SURPRISE IS WAITING</span>
+    <h1>✨ Mystery Chest ✨</h1>
+    <p>Who knows which little cat friend you'll discover today?</p>
+  </div>
+
+  <div class="chest-container">
+
+    <div class="chest-illustration">
+      <div class="chest-glow"></div>
+      <div class="chest-emoji">🎁</div>
+      <span class="sparkle sparkle-one">✦</span>
+      <span class="sparkle sparkle-two">✧</span>
+      <span class="sparkle sparkle-three">✦</span>
+    </div>
+
+    <div class="chest-info">
+      <h2>Your next cat is waiting!</h2>
+
+      <p>
+        Open a mystery chest to unlock a random cat
+        and add it to your growing collection.
+      </p>
+
+      <div class="chest-cost">
+        <span>🐾</span>
+        <strong>30 Paws</strong>
+        <small>Per chest</small>
+      </div>
+
+      <button class="chest-open-btn" id="chestOpenBtn" disabled>
+        🎁 Open Mystery Chest
+      </button>
+
+      <small class="chest-note">
+        Your paws will be used when you open a chest.
+      </small>
+    </div>
+
+  </div>
+
+  <div class="rarity-section">
+    <h2>What could be inside?</h2>
+    <p>Every chest has a chance to reveal a special cat!</p>
+
+    <div class="rarity-list">
+
+      <div class="rarity-card common">
+        <span>🐱</span>
+        <strong>Common</strong>
+      </div>
+
+      <div class="rarity-card uncommon">
+        <span>🐈</span>
+        <strong>Uncommon</strong>
+      </div>
+
+      <div class="rarity-card rare">
+        <span>😺</span>
+        <strong>Rare</strong>
+      </div>
+
+      <div class="rarity-card epic">
+        <span>😻</span>
+        <strong>Epic</strong>
+      </div>
+
+      <div class="rarity-card legendary">
+        <span>👑</span>
+        <strong>Legendary</strong>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+<script src="theme.js"></script>
+<script src="chest.js"></script>
+</body>
+</html>

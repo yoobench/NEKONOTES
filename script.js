@@ -1,824 +1,232 @@
-// ==========================================
-// NEKONOTES
-// Reward-Based Digital Diary and Tracker
-// ==========================================
-
-// CAT COLLECTION
-
-const cats = [
-    {
-        id: 1,
-        name: "Mochi",
-        emoji: "🐱",
-        description: "Your first loyal companion!",
-        cost: 0
-    },
-    {
-        id: 2,
-        name: "Luna",
-        emoji: "🐈‍⬛",
-        description: "A mysterious cat who loves nighttime.",
-        cost: 30
-    },
-    {
-        id: 3,
-        name: "Peaches",
-        emoji: "🐈",
-        description: "A sweet cat with a sunny personality.",
-        cost: 60
-    },
-    {
-        id: 4,
-        name: "Mochimaru",
-        emoji: "😺",
-        description: "A cheerful friend who loves adventures.",
-        cost: 100
-    },
-    {
-        id: 5,
-        name: "Snowball",
-        emoji: "😽",
-        description: "A fluffy cat who enjoys cozy naps.",
-        cost: 150
-    },
-    {
-        id: 6,
-        name: "Princess",
-        emoji: "😻",
-        description: "A royal kitty worthy of your collection.",
-        cost: 220
-    }
+(function(){
+  var STICKERS = [
+  { n: 'Heart Kit', r: 'Common' },
+  { n: 'Hello Wave', r: 'Common' },
+  { n: 'Silly Love', r: 'Uncommon' },
+  { n: 'Wink Fluff', r: 'Rare' },
+  { n: 'Tulip Gift', r: 'Epic' },
+  { n: 'Who Me', r: 'Common' },
+  { n: 'Smug Smile', r: 'Uncommon' },
+  { n: 'Starry Wink', r: 'Rare' },
+  { n: 'Bow Kitten', r: 'Legendary' },
+  { n: 'Snoot Bows', r: 'Epic' }
 ];
+  var COST = 30, DIARY_REWARD = 15, KEY = 'nekonotes.v1';
+  var EXT = ['png','jpg','jpeg','webp'];
 
-const DEFAULT_STATE = {
-    points: 0,
-    entries: [],
-    tasks: [],
-    unlockedCats: [1],
-    claimedRewards: {
-        entries: [],
-        tasks: []
+  var S = load();
+  function load(){
+    try{
+      var d = JSON.parse(localStorage.getItem(KEY));
+      if(d && typeof d === 'object') return Object.assign({tasks:[],entries:[],paws:0,owned:[],custom:{},rewardDays:[],doneTotal:0}, d);
+    }catch(e){}
+    return {tasks:[],entries:[],paws:0,owned:[],custom:{},rewardDays:[],doneTotal:0};
+  }
+  function save(){
+    try{ localStorage.setItem(KEY, JSON.stringify(S)); }
+    catch(e){ toast('Storage is full, try smaller sticker images'); }
+  }
+  function $(id){return document.getElementById(id)}
+  function pad(n){return n<10?'0'+n:''+n}
+  function dayKey(d){d=d||new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+  function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+  var tTimer;
+  function toast(m){
+    var t=$('toast');t.textContent=m;t.classList.add('show');
+    clearTimeout(tTimer);tTimer=setTimeout(function(){t.classList.remove('show')},2200);
+  }
+
+  /* sticker image with fallbacks */
+  function stickerImg(i){
+    var holder = document.createDocumentFragment();
+    if(S.custom[i]){
+      var im = document.createElement('img'); im.src = S.custom[i]; im.alt = STICKERS[i].n;
+      im.onerror = function(){ delete S.custom[i]; save(); };
+      holder.appendChild(im); return holder;
     }
-};
-
-// ==========================================
-// DATA STORAGE
-// ==========================================
-
-function loadState() {
-    try {
-        const saved = localStorage.getItem("nekoNotesData");
-
-        if (!saved) {
-            return structuredClone(DEFAULT_STATE);
-        }
-
-        const data = JSON.parse(saved);
-
-        if (
-            !data ||
-            !Number.isFinite(data.points) ||
-            data.points < 0 ||
-            !Array.isArray(data.entries) ||
-            !Array.isArray(data.tasks) ||
-            !Array.isArray(data.unlockedCats) ||
-            !data.claimedRewards
-        ) {
-            throw new Error("Invalid saved data.");
-        }
-
-        return {
-            ...DEFAULT_STATE,
-            ...data,
-            points: Math.floor(data.points),
-            entries: data.entries,
-            tasks: data.tasks,
-            unlockedCats: [
-                ...new Set(
-                    [1, ...data.unlockedCats].filter(
-                        id => cats.some(cat => cat.id === id)
-                    )
-                )
-            ],
-            claimedRewards: {
-                entries: Array.isArray(data.claimedRewards.entries)
-                    ? data.claimedRewards.entries
-                    : [],
-                tasks: Array.isArray(data.claimedRewards.tasks)
-                    ? data.claimedRewards.tasks
-                    : []
-            }
-        };
-
-    } catch (error) {
-        console.error("Unable to load NekoNotes data:", error);
-
-        alert(
-            "Your saved data could not be read. " +
-            "The website will start with fresh data. " +
-            "Your previous browser data has not been deleted."
-        );
-
-        return structuredClone(DEFAULT_STATE);
-    }
-}
-
-let state = loadState();
-
-function saveState() {
-    try {
-        localStorage.setItem("nekoNotesData", JSON.stringify(state));
-        return true;
-    } catch (error) {
-        console.error("Unable to save NekoNotes data:", error);
-
-        showToast(
-            "Saving failed. Your browser storage may be full or unavailable."
-        );
-
-        return false;
-    }
-}
-
-// ==========================================
-// GENERAL HELPERS
-// ==========================================
-
-function createId() {
-    if (window.crypto && crypto.randomUUID) {
-        return crypto.randomUUID();
-    }
-
-    return Date.now().toString(36) +
-        Math.random().toString(36).slice(2);
-}
-
-function escapeHTML(value) {
-    return String(value).replace(/[&<>"']/g, character => {
-        const entities = {
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#39;"
-        };
-
-        return entities[character];
-    });
-}
-
-function showToast(message) {
-    const toast = document.getElementById("toast");
-
-    toast.textContent = message;
-    toast.classList.add("show");
-
-    clearTimeout(showToast.timeout);
-
-    showToast.timeout = setTimeout(() => {
-        toast.classList.remove("show");
-    }, 3000);
-}
-
-function formatDate(dateString) {
-    const date = new Date(dateString);
-
-    if (Number.isNaN(date.getTime())) {
-        return "Unknown date";
-    }
-
-    return date.toLocaleString([], {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit"
-    });
-}
-
-// ==========================================
-// PAGE NAVIGATION
-// ==========================================
-
-const pageTitles = {
-    dashboard: "Welcome to NekoNotes! 🌸",
-    diary: "Your Little Diary 📖",
-    tracker: "Your Daily Tracker ✅",
-    cats: "Your Cat Collection 🐱"
-};
-
-function openPage(pageName) {
-    const target = document.getElementById(pageName);
-
-    if (!target) {
-        return;
-    }
-
-    document.querySelectorAll(".page").forEach(page => {
-        page.classList.remove("active-page");
-    });
-
-    target.classList.add("active-page");
-
-    document.querySelectorAll(".nav-btn").forEach(button => {
-        button.classList.toggle(
-            "active",
-            button.dataset.page === pageName
-        );
-    });
-
-    document.getElementById("pageTitle").textContent =
-        pageTitles[pageName] || "NekoNotes";
-
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
-
-    renderAll();
-}
-
-document.querySelectorAll(".nav-btn").forEach(button => {
-    button.addEventListener("click", () => {
-        openPage(button.dataset.page);
-    });
-});
-
-// ==========================================
-// POINTS SYSTEM
-// ==========================================
-
-function awardPoints(amount, message) {
-    state.points += amount;
-
-    if (!saveState()) {
-        state.points -= amount;
-        return false;
-    }
-
-    renderAll();
-    showToast(message);
-
-    return true;
-}
-
-// ==========================================
-// DIARY SYSTEM
-// ==========================================
-
-document.getElementById("saveEntryBtn").addEventListener(
-    "click",
-    saveDiaryEntry
-);
-
-function saveDiaryEntry() {
-    const titleInput = document.getElementById("entryTitle");
-    const moodInput = document.getElementById("entryMood");
-    const contentInput = document.getElementById("entryContent");
-
-    const title = titleInput.value.trim();
-    const mood = moodInput.value;
-    const content = contentInput.value.trim();
-
-    if (!title || !content) {
-        showToast("Please enter a title and your diary thoughts. 💗");
-        return;
-    }
-
-    const entry = {
-        id: createId(),
-        title: title,
-        mood: mood,
-        content: content,
-        date: new Date().toISOString()
+    var tries = 0, img = document.createElement('img');
+    img.alt = STICKERS[i].n;
+    img.src = 'stickers/cat-' + pad(i+1) + '.' + EXT[0];
+    img.onerror = function(){
+      tries++;
+      if(tries < EXT.length){ img.src = 'stickers/cat-' + pad(i+1) + '.' + EXT[tries]; }
+      else {
+        var ph = document.createElement('div'); ph.className='ph';
+        ph.innerHTML = '<svg viewBox="0 0 64 64"><use href="#paw"/></svg>';
+        if(img.parentNode) img.parentNode.replaceChild(ph, img);
+      }
     };
-
-    state.entries.unshift(entry);
-
-    // Each entry can earn its reward only once.
-    state.claimedRewards.entries.push(entry.id);
-
-    // Save the entry and points together.
-    state.points += 10;
-
-    if (!saveState()) {
-        state.entries.shift();
-        state.claimedRewards.entries.pop();
-        state.points -= 10;
-        return;
-    }
-
-    titleInput.value = "";
-    contentInput.value = "";
-    moodInput.value = "😊";
-
-    renderAll();
-
-    showToast("Diary entry saved! You earned 10 points! ⭐");
-
-    openPage("diary");
-}
-
-function deleteDiaryEntry(entryId) {
-    const entry = state.entries.find(item => item.id === entryId);
-
-    if (!entry) {
-        return;
-    }
-
-    const confirmed = confirm(
-        "Delete this diary entry? This action cannot be undone."
-    );
-
-    if (!confirmed) {
-        return;
-    }
-
-    const previousEntries = state.entries;
-
-    state.entries = state.entries.filter(
-        item => item.id !== entryId
-    );
-
-    // Points already earned are not removed.
-    if (!saveState()) {
-        state.entries = previousEntries;
-        return;
-    }
-
-    renderAll();
-    showToast("Diary entry deleted.");
-}
-
-function renderEntries() {
-    const allEntries = document.getElementById("allEntries");
-    const recentEntries = document.getElementById("recentEntries");
-
-    document.getElementById("entryCountLabel").textContent =
-        `${state.entries.length} ${state.entries.length === 1 ? "entry" : "entries"}`;
-
-    if (state.entries.length === 0) {
-        const emptyHTML = `
-            <div class="empty-state">
-                <div style="font-size: 40px;">📖</div>
-                <p>Your diary is waiting for its first story!</p>
-                <p>Write something about your day. 💗</p>
-            </div>
-        `;
-
-        allEntries.innerHTML = emptyHTML;
-        recentEntries.innerHTML = emptyHTML;
-
-        return;
-    }
-
-    const createEntryHTML = entry => `
-        <article class="entry-card">
-            <div class="entry-card-top">
-                <div>
-                    <h3>${escapeHTML(entry.title)}</h3>
-                    <p class="entry-date">
-                        ${escapeHTML(formatDate(entry.date))}
-                    </p>
-                </div>
-
-                <span class="entry-mood">
-                    ${escapeHTML(entry.mood)}
-                </span>
-            </div>
-
-            <p class="entry-content">${escapeHTML(entry.content)}</p>
-
-            <div class="entry-card-bottom">
-                <span class="entry-reward">⭐ +10 points earned</span>
-
-                <button
-                    class="delete-btn"
-                    data-delete-entry="${escapeHTML(entry.id)}"
-                >
-                    Delete
-                </button>
-            </div>
-        </article>
-    `;
-
-    allEntries.innerHTML = state.entries
-        .map(createEntryHTML)
-        .join("");
-
-    recentEntries.innerHTML = state.entries
-        .slice(0, 3)
-        .map(createEntryHTML)
-        .join("");
-}
-
-document.addEventListener("click", event => {
-    const button = event.target.closest("[data-delete-entry]");
-
-    if (!button) {
-        return;
-    }
-
-    deleteDiaryEntry(button.dataset.deleteEntry);
-});
-
-// ==========================================
-// DAILY TASK TRACKER
-// ==========================================
-
-let currentFilter = "all";
-
-document.getElementById("taskForm").addEventListener(
-    "submit",
-    addTask
-);
-
-function addTask(event) {
-    event.preventDefault();
-
-    const input = document.getElementById("taskInput");
-    const title = input.value.trim();
-
-    if (!title) {
-        showToast("Please enter a task first! 🌷");
-        return;
-    }
-
-    const task = {
-        id: createId(),
-        title: title,
-        completed: false,
-        createdAt: new Date().toISOString()
-    };
-
-    state.tasks.unshift(task);
-
-    if (!saveState()) {
-        state.tasks.shift();
-        return;
-    }
-
-    input.value = "";
-
-    renderAll();
-
-    showToast("New task added! Good luck! 🌱");
-}
-
-function toggleTask(taskId) {
-    const task = state.tasks.find(item => item.id === taskId);
-
-    if (!task) {
-        return;
-    }
-
-    const previousCompleted = task.completed;
-    const previousPoints = state.points;
-
-    task.completed = !task.completed;
-
-    if (task.completed) {
-        // Only award points if this task has never earned them.
-        if (!state.claimedRewards.tasks.includes(task.id)) {
-            state.claimedRewards.tasks.push(task.id);
-            state.points += 5;
-        }
-    }
-
-    // Unchecking a task does not take back its earned points.
-    if (!saveState()) {
-        task.completed = previousCompleted;
-        state.points = previousPoints;
-
-        if (previousCompleted === false) {
-            state.claimedRewards.tasks =
-                state.claimedRewards.tasks.filter(
-                    id => id !== task.id
-                );
-        }
-
-        return;
-    }
-
-    renderAll();
-
-    if (task.completed) {
-        showToast("Task completed! You earned 5 points! ⭐");
-    } else {
-        showToast("Task marked as in progress.");
-    }
-}
-
-function deleteTask(taskId) {
-    const task = state.tasks.find(item => item.id === taskId);
-
-    if (!task) {
-        return;
-    }
-
-    const confirmed = confirm("Delete this task?");
-
-    if (!confirmed) {
-        return;
-    }
-
-    const previousTasks = state.tasks;
-
-    state.tasks = state.tasks.filter(
-        item => item.id !== taskId
-    );
-
-    // Keep previously earned points.
-    if (!saveState()) {
-        state.tasks = previousTasks;
-        return;
-    }
-
-    renderAll();
-    showToast("Task deleted.");
-}
-
-document.addEventListener("change", event => {
-    const checkbox = event.target.closest("[data-task-check]");
-
-    if (!checkbox) {
-        return;
-    }
-
-    toggleTask(checkbox.dataset.taskCheck);
-});
-
-document.addEventListener("click", event => {
-    const button = event.target.closest("[data-delete-task]");
-
-    if (!button) {
-        return;
-    }
-
-    deleteTask(button.dataset.deleteTask);
-});
-
-document.querySelectorAll(".filter-btn").forEach(button => {
-    button.addEventListener("click", () => {
-        currentFilter = button.dataset.filter;
-
-        document.querySelectorAll(".filter-btn").forEach(item => {
-            item.classList.toggle("active", item === button);
-        });
-
-        renderTasks();
+    holder.appendChild(img);
+    return holder;
+  }
+  function fillSlot(el, i){ el.innerHTML=''; el.appendChild(stickerImg(i)); }
+
+  /* paws */
+  function setPaws(n){ S.paws = Math.max(0,n); $('pawCount').textContent = S.paws; updateGacha(); }
+  function addPaws(n){ setPaws(S.paws + n); }
+
+  /* tasks */
+  var size = 10;
+  document.querySelectorAll('#sizeSeg button').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('#sizeSeg button').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on'); size = parseInt(b.dataset.v,10);
     });
-});
-
-function createTaskHTML(task) {
-    return `
-        <div class="task-item ${task.completed ? "completed" : ""}">
-            <input
-                type="checkbox"
-                class="task-check"
-                data-task-check="${escapeHTML(task.id)}"
-                aria-label="Mark ${escapeHTML(task.title)} as completed"
-                ${task.completed ? "checked" : ""}
-            >
-
-            <span class="task-text">
-                ${escapeHTML(task.title)}
-            </span>
-
-            <span class="task-reward">
-                ${task.completed ? "✓ Earned" : "+5 ⭐"}
-            </span>
-
-            <button
-                class="delete-btn"
-                data-delete-task="${escapeHTML(task.id)}"
-                aria-label="Delete task"
-            >
-                ✕
-            </button>
-        </div>
-    `;
-}
-
-function renderTasks() {
-    const allTasks = document.getElementById("allTasks");
-    const dashboardTasks = document.getElementById("dashboardTasks");
-
-    const completedCount = state.tasks.filter(
-        task => task.completed
-    ).length;
-
-    document.getElementById("taskCountLabel").textContent =
-        `${state.tasks.length} tasks · ${completedCount} completed`;
-
-    let filteredTasks = state.tasks;
-
-    if (currentFilter === "active") {
-        filteredTasks = state.tasks.filter(
-            task => !task.completed
-        );
+  });
+  $('taskForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    var v = $('taskInput').value.trim(); if(!v) return;
+    S.tasks.unshift({id:Date.now(),text:v,pts:size,done:false});
+    $('taskInput').value=''; save(); renderTasks();
+  });
+  function renderTasks(){
+    var ul = $('taskList'); ul.innerHTML='';
+    if(!S.tasks.length){
+      ul.innerHTML = '<li class="empty">No tasks yet. Add one above and start earning paws.</li>';
     }
+    S.tasks.forEach(function(t){
+      var li = document.createElement('li'); li.className='task'+(t.done?' done':'');
+      li.innerHTML =
+        '<button class="check" aria-label="Toggle task"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
+        '<span class="t">'+esc(t.text)+'</span>'+
+        '<span class="badge">+'+t.pts+'</span>'+
+        '<button class="del" aria-label="Delete task">&times;</button>';
+      li.querySelector('.check').addEventListener('click',function(){
+        if(!t.done){ t.done=true; S.doneTotal++; addPaws(t.pts); toast('+'+t.pts+' paws earned'); }
+        else { t.done=false; S.doneTotal=Math.max(0,S.doneTotal-1); addPaws(-t.pts); }
+        save(); renderTasks(); renderStats();
+      });
+      li.querySelector('.del').addEventListener('click',function(){
+        if(t.done){ S.doneTotal=Math.max(0,S.doneTotal-1); }
+        S.tasks = S.tasks.filter(function(x){return x.id!==t.id});
+        save(); renderTasks(); renderStats();
+      });
+      ul.appendChild(li);
+    });
+    var done = S.tasks.filter(function(t){return t.done}).length;
+    $('taskBar').style.width = S.tasks.length ? Math.round(done/S.tasks.length*100)+'%' : '0%';
+  }
 
-    if (currentFilter === "completed") {
-        filteredTasks = state.tasks.filter(
-            task => task.completed
-        );
+  /* diary */
+  var mood = '';
+  document.querySelectorAll('#moods .chip').forEach(function(c){
+    c.addEventListener('click',function(){
+      var on = c.classList.contains('on');
+      document.querySelectorAll('#moods .chip').forEach(function(x){x.classList.remove('on')});
+      if(!on){ c.classList.add('on'); mood = c.dataset.m; } else mood='';
+    });
+  });
+  $('diaryForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    var v = $('diaryInput').value.trim(); if(!v) return;
+    var now = new Date(), k = dayKey(now);
+    S.entries.unshift({id:Date.now(),text:v,mood:mood,day:k,time:now.toISOString()});
+    if(S.rewardDays.indexOf(k)===-1){ S.rewardDays.push(k); addPaws(DIARY_REWARD); toast('+'+DIARY_REWARD+' paws for today\'s entry'); }
+    else toast('Entry saved');
+    $('diaryInput').value=''; save(); renderEntries(); renderStats();
+  });
+  function renderEntries(){
+    var box = $('entryList'); box.innerHTML='';
+    if(!S.entries.length){ box.innerHTML='<div class="empty">Your diary is empty. Write your first entry.</div>'; return; }
+    S.entries.forEach(function(en){
+      var d = new Date(en.time);
+      var label = d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})+' at '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+      var div = document.createElement('div'); div.className='entry';
+      div.innerHTML = '<div class="meta"><span>'+esc(label)+'</span>'+(en.mood?'<span class="mood">'+esc(en.mood)+'</span>':'')+'</div><p>'+esc(en.text)+'</p>';
+      var del = document.createElement('button'); del.className='del'; del.innerHTML='&times;'; del.setAttribute('aria-label','Delete entry');
+      del.addEventListener('click',function(){ S.entries=S.entries.filter(function(x){return x.id!==en.id}); save(); renderEntries(); renderStats(); });
+      div.querySelector('.meta').appendChild(del);
+      box.appendChild(div);
+    });
+  }
+  function streak(){
+    var days = {}; S.entries.forEach(function(e){days[e.day]=1});
+    var d = new Date(), n = 0;
+    if(!days[dayKey(d)]) d.setDate(d.getDate()-1);
+    while(days[dayKey(d)]){ n++; d.setDate(d.getDate()-1); }
+    return n;
+  }
+  function renderStats(){
+    $('stEntries').textContent = S.entries.length;
+    $('stStreak').textContent = streak();
+    $('stDone').textContent = S.doneTotal;
+  }
+
+  /* collection */
+  var pickIndex = null;
+  function renderGrid(){
+    var g = $('grid'); g.innerHTML='';
+    STICKERS.forEach(function(s,i){
+      var owned = S.owned.indexOf(i)!==-1;
+      var c = document.createElement('div'); c.className='card '+(owned?'owned':'locked');
+      var pic = document.createElement('div'); pic.className='pic'; pic.appendChild(stickerImg(i));
+      if(!owned){ var l=document.createElement('div'); l.className='lock'; l.innerHTML='<svg viewBox="0 0 24 24"><use href="#lockicon"/></svg>'; pic.appendChild(l); }
+      c.appendChild(pic);
+      c.insertAdjacentHTML('beforeend','<h4>'+(owned?esc(s.n):'Mystery cat')+'</h4><div class="rar">'+(owned?s.r:'Locked')+'</div>');
+      var ch = document.createElement('button'); ch.className='change'; ch.textContent='Change image';
+      ch.addEventListener('click',function(){ pickIndex=i; $('filePick').click(); });
+      c.appendChild(ch);
+      g.appendChild(c);
+    });
+    $('ownedCount').textContent = S.owned.length;
+    document.querySelectorAll('[data-slot]').forEach(function(el){ fillSlot(el, parseInt(el.dataset.slot,10)); });
+    updateGacha();
+  }
+  function updateGacha(){
+    var b = $('gachaBtn'); if(!b) return;
+    var full = S.owned.length>=STICKERS.length;
+    b.disabled = full || S.paws < COST;
+    b.textContent = full ? 'Collection complete' : (S.paws<COST ? 'Need '+(COST-S.paws)+' more paws' : 'Unlock a sticker  (30 paws)');
+  }
+  $('gachaBtn').addEventListener('click',function(){
+    if(S.paws<COST) return;
+    var locked = []; STICKERS.forEach(function(_,i){ if(S.owned.indexOf(i)===-1) locked.push(i) });
+    if(!locked.length) return;
+    var pick = locked[Math.floor(Math.random()*locked.length)];
+    addPaws(-COST); S.owned.push(pick); save(); renderGrid();
+    fillSlot($('modalPic'), pick);
+    $('modalName').textContent = STICKERS[pick].n;
+    $('modalRar').textContent = STICKERS[pick].r;
+    $('modalRar').className =
+  'rar reward-rarity ' + STICKERS[pick].r.toLowerCase();
+    $('modal').classList.add('show');
+  });
+  $('modalClose').addEventListener('click',function(){ $('modal').classList.remove('show'); });
+  $('modal').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
+
+  $('filePick').addEventListener('change',function(){
+    var f = this.files[0]; if(!f || pickIndex===null) return;
+    var r = new FileReader();
+    r.onload = function(){
+      var img = new Image();
+      img.onload = function(){
+        var max = 420, sc = Math.min(1, max/Math.max(img.width,img.height));
+        var cv = document.createElement('canvas'); cv.width = Math.round(img.width*sc); cv.height = Math.round(img.height*sc);
+        cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+        S.custom[pickIndex] = cv.toDataURL('image/png');
+        save(); renderGrid(); toast('Sticker image updated');
+      };
+      img.src = r.result;
+    };
+    r.readAsDataURL(f); this.value='';
+  });
+
+  $('resetBtn').addEventListener('click',function(){
+    var b=this;
+    if(!b.dataset.arm){
+      b.dataset.arm='1'; b.textContent='Click again to erase everything';
+      setTimeout(function(){ delete b.dataset.arm; b.textContent='Reset all data'; },4000);
+      return;
     }
+    delete b.dataset.arm; b.textContent='Reset all data';
+    S = {tasks:[],entries:[],paws:0,owned:[],custom:{},rewardDays:[],doneTotal:0};
+    save(); init();
+  });
 
-    if (filteredTasks.length === 0) {
-        allTasks.innerHTML = `
-            <div class="empty-state">
-                No tasks here yet. 🌸
-            </div>
-        `;
-    } else {
-        allTasks.innerHTML = filteredTasks
-            .map(createTaskHTML)
-            .join("");
-    }
-
-    if (state.tasks.length === 0) {
-        dashboardTasks.innerHTML = `
-            <div class="empty-state">
-                <p>No tasks yet!</p>
-                <p>Add a small goal to get started. 🌷</p>
-            </div>
-        `;
-    } else {
-        dashboardTasks.innerHTML = state.tasks
-            .slice(0, 4)
-            .map(createTaskHTML)
-            .join("");
-    }
-}
-
-// ==========================================
-// CAT COLLECTION AND REWARDS
-// ==========================================
-
-function unlockCat(catId) {
-    const cat = cats.find(item => item.id === catId);
-
-    if (!cat) {
-        return;
-    }
-
-    if (state.unlockedCats.includes(catId)) {
-        showToast("You already have this adorable cat! 🐱");
-        return;
-    }
-
-    if (state.points < cat.cost) {
-        showToast(
-            `You need ${cat.cost - state.points} more points! ⭐`
-        );
-        return;
-    }
-
-    const previousPoints = state.points;
-
-    state.points -= cat.cost;
-    state.unlockedCats.push(catId);
-
-    if (!saveState()) {
-        state.points = previousPoints;
-
-        state.unlockedCats = state.unlockedCats.filter(
-            id => id !== catId
-        );
-
-        return;
-    }
-
-    renderAll();
-
-    showToast(`You unlocked ${cat.name}! Welcome to your family! 💗`);
-}
-
-function renderCats() {
-    const catGrid = document.getElementById("catGrid");
-
-    document.getElementById("collectionCount").textContent =
-        state.unlockedCats.length;
-
-    catGrid.innerHTML = cats.map(cat => {
-        const unlocked = state.unlockedCats.includes(cat.id);
-
-        let buttonHTML;
-
-        if (unlocked) {
-            buttonHTML = `
-                <span class="cat-status">✓ Collected</span>
-            `;
-        } else {
-            buttonHTML = `
-                <button
-                    class="primary-btn unlock-btn"
-                    data-unlock-cat="${cat.id}"
-                    ${state.points < cat.cost ? "disabled" : ""}
-                >
-                    Unlock · ${cat.cost} ⭐
-                </button>
-            `;
-        }
-
-        return `
-            <article class="cat-card ${unlocked ? "unlocked" : "locked"}">
-                <div class="cat-image">
-                    ${unlocked ? cat.emoji : "🐾"}
-                </div>
-
-                <h3>${escapeHTML(cat.name)}</h3>
-
-                <p>
-                    ${unlocked
-                        ? escapeHTML(cat.description)
-                        : "A mystery kitty is waiting to join you!"}
-                </p>
-
-                <div class="cat-cost">
-                    ${unlocked ? "YOUR LITTLE COMPANION" : `COST: ${cat.cost} POINTS`}
-                </div>
-
-                ${buttonHTML}
-            </article>
-        `;
-    }).join("");
-
-    const featuredCat = cats.find(
-        cat => cat.id === state.unlockedCats[
-            state.unlockedCats.length - 1
-        ]
-    ) || cats[0];
-
-    document.getElementById("featuredCatImage").textContent =
-        featuredCat.emoji;
-
-    document.getElementById("featuredCatName").textContent =
-        featuredCat.name;
-
-    document.getElementById("featuredCatDescription").textContent =
-        featuredCat.description;
-}
-
-document.addEventListener("click", event => {
-    const button = event.target.closest("[data-unlock-cat]");
-
-    if (!button) {
-        return;
-    }
-
-    unlockCat(Number(button.dataset.unlockCat));
-});
-
-// ==========================================
-// DASHBOARD STATISTICS
-// ==========================================
-
-function renderDashboard() {
-    document.getElementById("totalPoints").textContent =
-        state.points;
-
-    document.getElementById("headerPoints").textContent =
-        state.points;
-
-    document.getElementById("totalEntries").textContent =
-        state.entries.length;
-
-    document.getElementById("totalTasks").textContent =
-        state.tasks.filter(task => task.completed).length;
-
-    document.getElementById("totalCats").textContent =
-        state.unlockedCats.length;
-}
-
-// ==========================================
-// RENDER EVERYTHING
-// ==========================================
-
-function renderAll() {
-    renderDashboard();
-    renderEntries();
-    renderTasks();
-    renderCats();
-}
-
-// ==========================================
-// INITIALIZE THE WEBSITE
-// ==========================================
-
-function initializeApp() {
-    const now = new Date();
-
-    document.getElementById("currentDate").textContent =
-        now.toLocaleDateString(undefined, {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric"
-        });
-
-    renderAll();
-}
-
-initializeApp();
+  function init(){
+    $('pawCount').textContent = S.paws;
+    renderTasks(); renderEntries(); renderStats(); renderGrid();
+  }
+  init();
+})();
